@@ -1,5 +1,6 @@
 package chekanov.space.zakupkitoxls;
 
+import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -26,23 +27,27 @@ public class XMLWorkParser {
         }
     }
 
-    /*
-    *
-    * Дописываем тут потом ололо класс readFeed
-    *
-    * */
 
 
     private List readFeed(XmlPullParser parser) throws XmlPullParserException, IOException{
         List entries = new ArrayList();
-        parser.require(XmlPullParser.START_TAG, ns, "ns2:export");
-        while (parser.next() != XmlPullParser.END_TAG){
-            if(parser.getEventType() != XmlPullParser.START_TAG) {
-                continue;
-            }
-            String name = parser.getName();
-
-            }
-            return entries;
+        int event = parser.getEventType();
+        String tagName = "";
+        String text = "";
+        while (event != XmlPullParser.END_DOCUMENT){
+                if (event == XmlPullParser.START_DOCUMENT) {
+                    Log.d(MainActivity.TAG, "Start Document");
+                } else if (event == XmlPullParser.START_TAG) {
+                    tagName = parser.getName();
+                    Log.d(MainActivity.TAG, "<" + tagName + ">");
+                } else if (event == XmlPullParser.END_TAG) {
+                    Log.d(MainActivity.TAG, "</" + tagName + ">");
+                } else if (event == XmlPullParser.TEXT) {
+                    text = parser.getText();
+                    Log.d(MainActivity.TAG, text);
+                }
+                event = parser.next();
         }
+        return entries;
     }
+}

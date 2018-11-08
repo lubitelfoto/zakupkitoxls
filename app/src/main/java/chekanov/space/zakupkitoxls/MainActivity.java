@@ -1,6 +1,6 @@
 package chekanov.space.zakupkitoxls;
 
-import android.os.Environment;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,17 +8,13 @@ import android.util.Log;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.zip.InflaterInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,36 +33,51 @@ public class MainActivity extends AppCompatActivity {
 
         class NetWorkThread extends Thread {
 
-            public void run(){
-        try {
-            FTPWork ftpWorker = new FTPWork(server, user, pass);
-            File file = new File(fileDir, "notification_Adygeja_Resp_2018101000_2018101100_003.xml.zip");
-            ftpWorker.downloadFile("/fcs_regions/Adygeja_Resp/notifications/currMonth/notification_Adygeja_Resp_2018101000_2018101100_003.xml.zip",
-                    file);
-            Log.d(TAG, String.valueOf(file.exists()));
-            if(file.exists()) {
-                FileInputStream zipfin = new FileInputStream(file);
-                BufferedInputStream zin = new BufferedInputStream(zipfin);
+            public void run() {
+                try {
+                    String remotePath = "/fcs_regions/Adygeja_Resp/notifications/currMonth/";
 
-                try (ArchiveInputStream ain = new ArchiveStreamFactory().createArchiveInputStream(zin)){
-                    ArchiveEntry entry = null;
-                    while ((entry = ain.getNextEntry()) != null){
-                        Log.d(TAG, entry.getName());
+                    FTPWork ftpWorker = new FTPWork(server, user, pass);
+                    String[] nameFiles = ftpWorker.getNameFiles(remotePath);
+                    for (final String fileName : nameFiles) {
+                        InputStream zis = ftpWorker.downloadStream(fileName);
+                        if (zis != null)
+                        {
+                            BufferedInputStream zin = new BufferedInputStream(zis);
+                            try (ArchiveInputStream ain = new ArchiveStreamFactory().createArchiveInputStream(zin)) {
+                                ArchiveEntry entry = null;
+                                while ((entry = ain.getNextEntry()) != null) {
+
+                                    Log.d(TAG, String.valueOf(entry.getName()));
+                                    byte [] buf = new byte[(int)entry.getSize()];
+                                    int readed = IOUtils.readFully(ain, buf);
+                                    if(readed != buf.length) {
+                                        throw new RuntimeException("Read bytes count and entry size differ");
+                                    }
+                                    XMLWorkParser parser = new XMLWorkParser();
+                                    InputStream pis = new ByteArrayInputStream(buf);
+                                    parser.parse(pis);
+                                }
+                            } catch (Exception e) {
+                                //Вписать обработку ошибки
+                                Log.e(TAG, "Ошибка FTPWork", e);
+                            }
+                        }
+                        else {
+                            ftpWorker.reconnect();
+                        }
+                       /* if (zis != null) {
+                            zis.close();
+                        }*/
                     }
+                } catch (Exception e) {
+                    //Вписать обработку ошибки
+                    Log.e(TAG, "Ошибка FTPWork", e);
                 }
-
-
             }
-                //ZIPWork zipWork = new ZIPWork(file);
-                //zipWork.unZip();}
-        }
-        catch (Exception e){
-            //Вписать обработку ошибки
-            Log.e(TAG, "Ошибка FTPWork", e);
-        }
-        }
         }
         NetWorkThread netWorkThread = new NetWorkThread();
         netWorkThread.start();
     }
+
 }
