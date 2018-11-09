@@ -1,6 +1,5 @@
 package chekanov.space.zakupkitoxls;
 
-
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +13,8 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
         final String pass = getResources().getString(R.string.ftp_password);
         final String server = getResources().getString(R.string.ftp_server);
         final File fileDir =  this.getFilesDir();
-
 
         class NetWorkThread extends Thread {
 
@@ -47,16 +46,22 @@ public class MainActivity extends AppCompatActivity {
                             try (ArchiveInputStream ain = new ArchiveStreamFactory().createArchiveInputStream(zin)) {
                                 ArchiveEntry entry = null;
                                 while ((entry = ain.getNextEntry()) != null) {
-
-                                    Log.d(TAG, String.valueOf(entry.getName()));
-                                    byte [] buf = new byte[(int)entry.getSize()];
-                                    int readed = IOUtils.readFully(ain, buf);
-                                    if(readed != buf.length) {
+                                    String entryName = entry.getName();
+                                    Log.d(TAG, String.valueOf(entryName));
+                                    Pattern pat = Pattern.compile("xml", Pattern.CASE_INSENSITIVE);
+                                    Matcher matcher = pat.matcher(entryName);
+                                    boolean isXML = matcher.find();
+                                    Log.d(TAG, String.valueOf(isXML));
+                                    if (isXML){
+                                        byte[] buf = new byte[(int) entry.getSize()];
+                                        int readed = IOUtils.readFully(ain, buf);
+                                        if (readed != buf.length) {
                                         throw new RuntimeException("Read bytes count and entry size differ");
                                     }
                                     XMLWorkParser parser = new XMLWorkParser();
                                     InputStream pis = new ByteArrayInputStream(buf);
                                     parser.parse(pis);
+                                }
                                 }
                             } catch (Exception e) {
                                 //Вписать обработку ошибки
@@ -79,5 +84,4 @@ public class MainActivity extends AppCompatActivity {
         NetWorkThread netWorkThread = new NetWorkThread();
         netWorkThread.start();
     }
-
 }

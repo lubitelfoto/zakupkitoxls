@@ -13,10 +13,10 @@ import org.apache.commons.net.ftp.FTPReply;
 
 public class FTPWork {
 
-    FTPClient ftp = null;
-    String host;
-    String user;
-    String pass;
+    private FTPClient ftp = null;
+    private String host;
+    private String user;
+    private String pass;
 
     public FTPWork(String host, String user, String pass) throws Exception{
 

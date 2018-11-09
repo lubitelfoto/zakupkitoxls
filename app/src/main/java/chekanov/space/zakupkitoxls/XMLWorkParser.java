@@ -8,19 +8,23 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class XMLWorkParser {
     private static final String ns = null;
 
-    public List parse(InputStream in) throws XmlPullParserException, IOException {
+    public void parse(InputStream in) throws XmlPullParserException, IOException {
         try{
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in, null);
-            parser.nextTag();
-            return readFeed(parser);
+            Log.d(MainActivity.TAG, "new zakupki item");
+            ZakupkiItem zakupkiItem = new ZakupkiItem(readFeed(parser));
+        }
+        catch (Exception e){
+            Log.e(MainActivity.TAG, "Parser error", e);
         }
         finally {
             in.close();
@@ -29,25 +33,30 @@ public class XMLWorkParser {
 
 
 
-    private List readFeed(XmlPullParser parser) throws XmlPullParserException, IOException{
-        List entries = new ArrayList();
+    private Map<String, String> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException{
         int event = parser.getEventType();
-        String tagName = "";
-        String text = "";
-        while (event != XmlPullParser.END_DOCUMENT){
-                if (event == XmlPullParser.START_DOCUMENT) {
-                    Log.d(MainActivity.TAG, "Start Document");
-                } else if (event == XmlPullParser.START_TAG) {
+        String tagName = null;
+        String tagText = null;
+        Map<String, String> map = new TreeMap<>();
+        while (event != XmlPullParser.END_DOCUMENT) {
+            switch (event) {
+                case (XmlPullParser.START_TAG):
                     tagName = parser.getName();
-                    Log.d(MainActivity.TAG, "<" + tagName + ">");
-                } else if (event == XmlPullParser.END_TAG) {
-                    Log.d(MainActivity.TAG, "</" + tagName + ">");
-                } else if (event == XmlPullParser.TEXT) {
-                    text = parser.getText();
-                    Log.d(MainActivity.TAG, text);
-                }
-                event = parser.next();
+                    break;
+                case (XmlPullParser.TEXT):
+                    if (!parser.isWhitespace()) {
+                        tagText = parser.getText();
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (tagName != null && tagText != null) {
+                map.put(tagName, tagText);
+            }
+            event = parser.next();
         }
-        return entries;
+
+        return map;
     }
 }
