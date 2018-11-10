@@ -4,12 +4,11 @@ import android.util.Log;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
-public class ZakupkiItem {
+public class ZakupkiItem{
     private long id;
     private long number;
     private Date publishDate;
@@ -86,11 +85,35 @@ public class ZakupkiItem {
                 number = Long.parseLong(pair.getValue());
                 break;
             case ("docPublishDate"):
+                try {
 
+                    //Посмотреть правильно ли парсится часовой пояс!!!!!
+
+                    publishDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.sssZ").parse(pair.getValue());
+                }
+                catch (Exception e){
+                    Log.e(MainActivity.TAG, "Date parse error", e);
+                }
+                break;
+            case ("href"):
+                try {
+                    link = new URL(pair.getValue());
+                }
+                catch (Exception e){
+                    Log.e(MainActivity.TAG, "URL parse error", e);
+                }
+                break;
+            case ("purchaseObjectInfo"):
+                objectInfo = pair.getValue();
+                break;
+            case ("deliveryPlace"):
+                deliveryPlace = pair.getValue();
+                break;
             default:
                 break;
         }
         }
-        Log.d(MainActivity.TAG, "id " + id + " number " + number);
+        Log.d(MainActivity.TAG, "id " + id + " number " + number + " date "
+                + publishDate + " href " + link + " objInfo " + objectInfo + " delivery plaace " + deliveryPlace);
     }
 }

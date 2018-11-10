@@ -13,6 +13,9 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
                             BufferedInputStream zin = new BufferedInputStream(zis);
                             try (ArchiveInputStream ain = new ArchiveStreamFactory().createArchiveInputStream(zin)) {
                                 ArchiveEntry entry = null;
+                                List<ZakupkiItem> zakupkiItems = new ArrayList<>();
                                 while ((entry = ain.getNextEntry()) != null) {
                                     String entryName = entry.getName();
                                     Log.d(TAG, String.valueOf(entryName));
@@ -60,7 +64,9 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     XMLWorkParser parser = new XMLWorkParser();
                                     InputStream pis = new ByteArrayInputStream(buf);
-                                    parser.parse(pis);
+                                    ZakupkiItem zakupkiItem = parser.parse(pis);
+                                    zakupkiItems.add(zakupkiItem);
+                                    XLSWork.writeXlsxFile(zakupkiItems);
                                 }
                                 }
                             } catch (Exception e) {

@@ -15,13 +15,14 @@ import java.util.TreeMap;
 public class XMLWorkParser {
     private static final String ns = null;
 
-    public void parse(InputStream in) throws XmlPullParserException, IOException {
+    public ZakupkiItem parse(InputStream in) throws XmlPullParserException, IOException {
+        ZakupkiItem zakupkiItem = null;
         try{
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in, null);
             Log.d(MainActivity.TAG, "new zakupki item");
-            ZakupkiItem zakupkiItem = new ZakupkiItem(readFeed(parser));
+            zakupkiItem = new ZakupkiItem(readFeed(parser));
         }
         catch (Exception e){
             Log.e(MainActivity.TAG, "Parser error", e);
@@ -29,6 +30,7 @@ public class XMLWorkParser {
         finally {
             in.close();
         }
+        return zakupkiItem;
     }
 
 
