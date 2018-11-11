@@ -12,8 +12,8 @@ import org.apache.commons.compress.utils.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -35,7 +35,10 @@ public class MainActivity extends AppCompatActivity {
 
         class NetWorkThread extends Thread {
 
+
+
             public void run() {
+                List<ZakupkiItem> zakupkiItems = new ArrayList<>();
                 try {
                     String remotePath = "/fcs_regions/Adygeja_Resp/notifications/currMonth/";
 
@@ -48,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
                             BufferedInputStream zin = new BufferedInputStream(zis);
                             try (ArchiveInputStream ain = new ArchiveStreamFactory().createArchiveInputStream(zin)) {
                                 ArchiveEntry entry = null;
-                                List<ZakupkiItem> zakupkiItems = new ArrayList<>();
                                 while ((entry = ain.getNextEntry()) != null) {
                                     String entryName = entry.getName();
                                     Log.d(TAG, String.valueOf(entryName));
@@ -66,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
                                     InputStream pis = new ByteArrayInputStream(buf);
                                     ZakupkiItem zakupkiItem = parser.parse(pis);
                                     zakupkiItems.add(zakupkiItem);
-                                    XLSWork.writeXlsxFile(zakupkiItems);
                                 }
                                 }
                             } catch (Exception e) {
@@ -77,15 +78,19 @@ public class MainActivity extends AppCompatActivity {
                         else {
                             ftpWorker.reconnect();
                         }
-                       /* if (zis != null) {
-                            zis.close();
-                        }*/
                     }
                 } catch (Exception e) {
                     //Вписать обработку ошибки
                     Log.e(TAG, "Ошибка FTPWork", e);
                 }
+                try {
+                    XLSWork.writeXlsxFile(zakupkiItems, fileDir);
+                }
+                catch (IOException e){
+                    Log.e(MainActivity.TAG, "XLSWork exception", e);
+                }
             }
+
         }
         NetWorkThread netWorkThread = new NetWorkThread();
         netWorkThread.start();
