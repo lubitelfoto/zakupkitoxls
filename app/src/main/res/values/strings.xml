@@ -1,6 +1,3 @@
 <resources>
     <string name="app_name">zakupkitoxls</string>
-    <string name="ftp_server">ftp.zakupki.gov.ru</string>
-    <string name="ftp_username">free</string>
-    <string name="ftp_password">free</string>
 </resources>

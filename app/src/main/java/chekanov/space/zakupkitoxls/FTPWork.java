@@ -1,6 +1,8 @@
 package chekanov.space.zakupkitoxls;
 
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -73,7 +75,7 @@ public class FTPWork {
             this.ftp.retrieveFile(remoteFilePath, fos);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(MainActivity.TAG, "Error download file", e);
         }
     }
         public InputStream downloadStream (String remoteFilePath){
@@ -82,7 +84,7 @@ public class FTPWork {
                 os = this.ftp.retrieveFileStream(remoteFilePath);
             }
             catch (Exception e){
-                e.printStackTrace();
+                Log.e(MainActivity.TAG, "Error download stream", e);
             }
             return os;
        }
@@ -94,9 +96,21 @@ public class FTPWork {
             nameFiles = this.ftp.listNames(remotePath);
         }
         catch (Exception e){
-            e.printStackTrace();
+            Log.e(MainActivity.TAG, "Error get name files", e);
         }
         return nameFiles;
+    }
+
+    public FTPFile [] getNameDirs(String remotePath){
+        FTPFile[] nameDirs = null;
+        try {
+            nameDirs = this.ftp.listDirectories(remotePath);
+            Log.d(MainActivity.TAG, "Number of directories" + String.valueOf(nameDirs.length));
+        }
+        catch (Exception e){
+            Log.e(MainActivity.TAG, "Error get names dir", e);
+        }
+        return nameDirs;
     }
 
         public FTPFile [] getListFiles(String remotePath){
@@ -105,7 +119,7 @@ public class FTPWork {
                 listFiles = this.ftp.listFiles(remotePath);
             }
             catch (Exception e){
-                e.printStackTrace();
+                Log.e(MainActivity.TAG, "Error list files", e);
             }
             return listFiles;
         }
@@ -115,7 +129,8 @@ public class FTPWork {
             try {
                 this.ftp.logout();
                 this.ftp.disconnect();
-            } catch (IOException f) {
+            } catch (IOException e) {
+                Log.e(MainActivity.TAG, "Error disconnect", e);
                 // do nothing as file is already downloaded from FTP server
             }
         }

@@ -9,8 +9,8 @@ import java.util.Date;
 import java.util.Map;
 
 public class ZakupkiItem{
-    private long id;
-    private long number;
+    private long id = 0;
+    private BigDecimal number = new BigDecimal("0");
     private Date publishDate;
     private URL link;
     private String objectInfo;
@@ -27,7 +27,7 @@ public class ZakupkiItem{
         return id;
     }
 
-    public long getNumber() {
+    public BigDecimal getNumber() {
         return number;
     }
 
@@ -82,7 +82,7 @@ public class ZakupkiItem{
                 id = Long.parseLong(pair.getValue());
                 break;
             case("purchaseNumber"):
-                number = Long.parseLong(pair.getValue());
+                number = new BigDecimal(pair.getValue());
                 break;
             case ("docPublishDate"):
                 try {
@@ -113,7 +113,6 @@ public class ZakupkiItem{
                 break;
         }
         }
-        Log.d(MainActivity.TAG, "id " + id + " number " + number + " date "
-                + publishDate + " href " + link + " objInfo " + objectInfo + " delivery plaace " + deliveryPlace);
+       // Log.d(MainActivity.TAG, "id " + id);
     }
 }

@@ -8,7 +8,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -21,7 +20,7 @@ public class XMLWorkParser {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in, null);
-            Log.d(MainActivity.TAG, "new zakupki item");
+            //Log.d(MainActivity.TAG, "new zakupki item");
             zakupkiItem = new ZakupkiItem(readFeed(parser));
         }
         catch (Exception e){
